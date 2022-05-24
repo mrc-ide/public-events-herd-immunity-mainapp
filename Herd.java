@@ -21,14 +21,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.util.Base64;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
-import javax.xml.bind.DatatypeConverter;
-
 
 public class Herd {
   String data_path = "";
@@ -142,12 +141,12 @@ public class Herd {
   
   String base64_encode(String string) {
     try {
-      return new String(DatatypeConverter.printBase64Binary(string.getBytes("UTF-8")));
+		return Base64.getEncoder().encodeToString(string.getBytes());
     } catch (Exception e) { e.printStackTrace(); return null; } 
   }
 
   String base64_decode(String string) {
-    return new String(DatatypeConverter.parseBase64Binary(string));
+    return new String(Base64.getDecoder().decode(string));
   }
 
   
