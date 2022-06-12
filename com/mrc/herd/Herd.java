@@ -34,28 +34,28 @@ import javax.swing.Timer;
 public class Herd {
   String data_path = "";
   boolean pc_waiting_for_next_game=false;
-  
+
   byte gui_mode;                      // Type of user interface...
   final static byte ANDROID = 1;      // Will poll a web address for commands for simulations to run
   final static byte PC = 2;           // Will expect mouse input from a PC
   final static byte UNATTENDED = 3;   // Will loop through demos non-interactively
   final static byte ANDROID_IDLE = 4; // Will loop through demos, but check online for new commands too.
-  
+
   int f=0;
   String job_name="";               // Name of currently running job
   byte current_mode=TITLE_PAGE;     // Current operation.
-  
+
   final static byte PLAYING=1;         // Playing a simulation
   final static byte ENDING_GAME=2;     // Fades and graphs
   final static byte TITLE_PAGE=3;      // Showing title page
   final static byte ENDING_TITLE=4;    // Fading out title page
   final static byte STARTING_GAME=5;   // Beginning the game
   final static byte BETWEEN_GAMES=6;   // Showing the graph - wondering what to do next.
-  
+
   static String STATUS_DEMO = new String("DEMO");
   static String STATUS_RUNNING = new String("RUN");
   static String STATUS_WAITING = new String("WAIT");
-  
+
   byte[] vacc_order = new byte[] {0,40,80,10,50,90,20,60,30,70};
   byte[] r0_order = new byte[] {5,8,4,7,3,6};
   byte current_vacc_order=0;
@@ -64,7 +64,7 @@ public class Herd {
   Font graphNum,graphTitle,graphBigTitle;
   String commandURL;
   // The Window
-  
+
   JFrame main;
   JPanel game;
   TitlePanel title;
@@ -73,7 +73,7 @@ public class Herd {
   Graphics2D g2d;
   int screen_width,screen_height;
   int sick_pos,recover_pos,healthy_pos,vacc_pos;
-  
+
   final int START_WIGGLE_1 = 101;
   final int END_WIGGLE_1 = START_WIGGLE_1+50;
   final int START_WIGGLE_2 = END_WIGGLE_1+20;
@@ -82,7 +82,7 @@ public class Herd {
   final int END_BARS = START_BARS+120;
   final int FADE_GRAPH = END_BARS+50;
   final int END_FADE_GRAPH = FADE_GRAPH+30;
-  
+
   public void checkReset() {
     String backups = new String("");
     File ff = new File(".");
@@ -112,8 +112,8 @@ public class Herd {
       } catch (Exception e) { e.printStackTrace(); }
     }
   }
-  
-  
+
+
   BufferedImage scatter,scatter2;
   BufferedImage bar,bar2;
   BufferedImage comp,comp2;
@@ -121,7 +121,7 @@ public class Herd {
   Graphics2D scatterG,scatterG2;
   Graphics2D barG,barG2,compG,compG2;
   double graph_margin=60;
-  
+
   public void nextRun() {
     current_vacc_order++;
     if (current_vacc_order>=vacc_order.length) {
@@ -138,20 +138,20 @@ public class Herd {
       PW.println(current_r0_order+"\t"+current_vacc_order);
       PW.close();
     } catch (Exception e) { e.printStackTrace(); }
-    
+
   }
-  
+
   String base64_encode(String string) {
     try {
 		return Base64.getEncoder().encodeToString(string.getBytes());
-    } catch (Exception e) { e.printStackTrace(); return null; } 
+    } catch (Exception e) { e.printStackTrace(); return null; }
   }
 
   String base64_decode(String string) {
     return new String(Base64.getDecoder().decode(string));
   }
 
-  
+
   public static int poisson(double lambda) {
     double L = Math.exp(-lambda);
     double p = 1.0;
@@ -162,9 +162,9 @@ public class Herd {
     } while (p > L);
     return k - 1;
   }
-  
+
   // The Game
-  
+
   float[] person_x;
   float[] person_y;
   float[] person_velx;
@@ -176,9 +176,9 @@ public class Herd {
   int[] person_infs;
   int no_infs,no_recoveries,no_healthy,no_vaccinations;
   int prev_no_infs,prev_no_recoveries,prev_no_healthy;
-  
+
   public int vacc_coverage = 50;
-  
+
   static byte SUSCEPTIBLE = 0;
   static byte VACCINATED = 1;
   static byte INFECTED = 2;
@@ -186,7 +186,7 @@ public class Herd {
   static BufferedImage[] person_images;
   int r0 = 5;
   int no_people = 200;
-  
+
   int playfield_width;
   int playfield_height;
   float person_diam = 20;
@@ -240,32 +240,32 @@ public class Herd {
     no_vaccinations=vacc;
     pg2d.setColor(Color.BLACK);
     pg2d.fillRect(0,playfield_height,playfield_width,140);
-    
+
     pg2d.setFont(littleStat);
     pg2d.setColor(Color.WHITE);
-    
+
     FontMetrics fm = pg2d.getFontMetrics();
-    
+
     sick_pos=(int)((playfield_width/2.0)+100);
     pg2d.drawString("SICK",sick_pos-(fm.stringWidth("SICK")/2),playfield_height+20);
-    
+
     vacc_pos=(int)((playfield_width/2.0)-100);
     pg2d.drawString("VACCINATED",vacc_pos-(fm.stringWidth("VACCINATED")/2),playfield_height+20);
-    
+
     recover_pos=(int)((playfield_width/2.0)+300);
     pg2d.drawString("RECOVERED",recover_pos-(fm.stringWidth("RECOVERED")/2),playfield_height+20);
-    
+
     healthy_pos=(int)((playfield_width/2.0)-300);
     pg2d.drawString("HEALTHY",healthy_pos-(fm.stringWidth("HEALTHY")/2),playfield_height+20);
     if (job_name==null) job_name="";
     if (!job_name.trim().equals("")) pg2d.drawString("Name: "+job_name,20,playfield_height+20);
-    
-    
+
+
     pg2d.setFont(bigStat);
     fm = pg2d.getFontMetrics();
     pg2d.drawString(String.valueOf(no_vaccinations), vacc_pos-(fm.stringWidth(String.valueOf(no_vaccinations))/2),playfield_height+85);
   }
-  
+
   public void contacts(int i, int j) {
     if (person_status[i]==INFECTED) {
       if (person_infector[i]!=j) {
@@ -297,15 +297,15 @@ public class Herd {
       }
     }
   }
-    
-  
+
+
   public void movepeople() {
     float propose_x,propose_y;
     for (int i=0; i<no_people; i++) {
       propose_x=person_x[i]+person_velx[i];
       propose_y=person_y[i]+person_vely[i];
       if (propose_y>playfield_height-12) propose_y=playfield_height-12;
-      
+
       // Check collisions...
       double dist;
       for (int j=0; j<no_people; j++) {
@@ -323,21 +323,21 @@ public class Herd {
           }
         }
       }
-      
+
       person_x[i]=person_x[i]+person_velx[i];
       person_y[i]=person_y[i]+person_vely[i];
       if (person_y[i]>playfield_height-12) person_y[i]=playfield_height-12;
-      
-      
+
+
       // Check playfield
-      
+
       if ((person_x[i]-person_radius<=margin) && (person_velx[i]<0)) person_velx[i]=-person_velx[i];
       if ((person_x[i]+person_radius>=playfield_width-margin) && (person_velx[i]>0)) person_velx[i]=-person_velx[i];
       if ((person_y[i]-person_radius<=margin) && (person_vely[i]<0)) person_vely[i]=-person_vely[i];
       if ((person_y[i]+person_radius>=playfield_height-(5+margin)) && (person_vely[i]>0)) person_vely[i]=-person_vely[i];
     }
   }
-  
+
   public void initPlayfield() {
     playfield = new BufferedImage(playfield_width,playfield_height+150,BufferedImage.TYPE_3BYTE_BGR);
     pg2d = (Graphics2D) playfield.getGraphics();
@@ -372,7 +372,7 @@ public class Herd {
     scatterG.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
     scatterG.setRenderingHint(RenderingHints.KEY_TEXT_LCD_CONTRAST, 140);
     scatterG.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,RenderingHints.VALUE_STROKE_NORMALIZE);
-    
+
     barG.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     barG.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
     barG.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
@@ -381,7 +381,7 @@ public class Herd {
     barG.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
     barG.setRenderingHint(RenderingHints.KEY_TEXT_LCD_CONTRAST, 140);
     barG.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,RenderingHints.VALUE_STROKE_NORMALIZE);
-    
+
     compG.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     compG.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
     compG.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
@@ -392,7 +392,7 @@ public class Herd {
     compG.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,RenderingHints.VALUE_STROKE_NORMALIZE);
     makeComparison();
   }
-  
+
   public void drawPlayfield(float opac) {
     pg2d.setColor(Color.BLACK);
     pg2d.fillRect(0, 0, playfield_width, playfield_height+2);
@@ -403,9 +403,9 @@ public class Herd {
       Color c = new Color(0,0,0,1.0f-opac);
       pg2d.setColor(c);
       pg2d.fillRect(0, 0, playfield_width, playfield_height+2);
-      
+
     }
-   
+
     if (prev_no_infs!=no_infs) {
       pg2d.setFont(bigStat);
       pg2d.setColor(Color.BLACK);
@@ -416,7 +416,7 @@ public class Herd {
       pg2d.drawString(String.valueOf(no_infs),pos,playfield_height+85);
       prev_no_infs=no_infs;
     }
-    
+
     if (prev_no_recoveries!=no_recoveries) {
       pg2d.setFont(bigStat);
       pg2d.setColor(Color.BLACK);
@@ -427,7 +427,7 @@ public class Herd {
       pg2d.drawString(String.valueOf(no_recoveries),pos,playfield_height+85);
       prev_no_recoveries=no_recoveries;
     }
-    
+
     if (prev_no_healthy!=(no_healthy+no_vaccinations)) {
       pg2d.setFont(bigStat);
       pg2d.setColor(Color.BLACK);
@@ -438,17 +438,17 @@ public class Herd {
       pg2d.drawString(String.valueOf(no_healthy+no_vaccinations),pos,playfield_height+85);
       prev_no_healthy=no_healthy+no_vaccinations;
     }
-    
-    
+
+
     g2d.drawImage(playfield,0,0,null);
-    
+
   }
   public void go() {
     try {
       GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
       ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, new File("fonts/dotmatri-webfont.ttf")));
     } catch (Exception e) {}
-    
+
     if (gui_mode==ANDROID) {
       gui_mode=ANDROID_IDLE;
       setStatus(STATUS_DEMO);
@@ -457,7 +457,7 @@ public class Herd {
     frame_timer.start();
     main.setVisible(true);
   }
-  
+
   final static Color[] rainbow = new Color[] {new Color(255,32,32),new Color(255,128,0),new Color(255,255,0),new Color(64,255,64),new Color(0,192,255),new Color(128,96,255)};
   public void makeComparison() {
     compG.setColor(Color.BLACK);
@@ -482,7 +482,7 @@ public class Herd {
     for (int r=3; r<=8; r++) {
       String fn = data_path+"data_"+String.valueOf(r)+".txt";
       try {
-        if (!new File(fn).exists()) { PrintWriter PW = new PrintWriter(new File(fn)); PW.close(); } 
+        if (!new File(fn).exists()) { PrintWriter PW = new PrintWriter(new File(fn)); PW.close(); }
         BufferedReader br = new BufferedReader(new FileReader(fn));
         String s = br.readLine();
         scatterG.setColor(Color.YELLOW);
@@ -508,7 +508,7 @@ public class Herd {
         grad=0;
         grad=(n*sumxy-(sumx*sumy))/((n*sumxx)-(sumx*sumx));
         y0=(sumy-(grad*sumx))/n;
-        
+
         int lastY=0;
         compG.setColor(rainbow[r-3]);
         for (int i=(int)graph_margin; i<(int)(scatter_width); i++) {
@@ -529,13 +529,13 @@ public class Herd {
     compG.drawString("Total Infections (%)",-150-(int)(((scatter_width-graph_margin)/2)-(fm.stringWidth("Total Infections (%)")/2)),15);
     compG.rotate(Math.PI/2.0);
   }
-  
+
   public void updateLogs() {
     String fn = data_path+"data_"+String.valueOf(r0)+".txt";
     try {
       PrintWriter PW = new PrintWriter(new BufferedWriter(new FileWriter(fn, true)));
       PW.println(String.valueOf(vacc_coverage)+"\t"+String.valueOf(no_recoveries));
-      PW.close();    
+      PW.close();
     } catch (Exception e) { e.printStackTrace(); }
 
     scatterG.setColor(Color.BLACK);
@@ -553,13 +553,13 @@ public class Herd {
       else scatterG.drawString(String.valueOf(i*10),(int)(graph_margin-13),4+(int)((scatter_height-graph_margin)-(i*(scatter_height-graph_margin)/10.0)));
       if (i>0) scatterG.drawString(String.valueOf(i*10),(int)((graph_margin-6)+(i*(scatter_width-graph_margin)/10.0)),(int)(scatter_height-(graph_margin-18)));
       else scatterG.drawString(String.valueOf(i*10),(int)((graph_margin-3)+(i*(scatter_width-graph_margin)/10.0)),(int)(scatter_height-(graph_margin-18)));
-      
+
     }
     scatterG.setFont(graphTitle);
     FontMetrics fm = scatterG.getFontMetrics();
     scatterG.drawString("Vaccinated People (%)",(int)(graph_margin+((scatter_width-graph_margin)/2)-(fm.stringWidth("Vaccinated People (%)")/2)),scatter_height-(int)(graph_margin-55));
     try {
-      if (!new File(fn).exists()) { PrintWriter PW = new PrintWriter(new File(fn)); PW.close(); } 
+      if (!new File(fn).exists()) { PrintWriter PW = new PrintWriter(new File(fn)); PW.close(); }
       BufferedReader br = new BufferedReader(new FileReader(fn));
       String s = br.readLine();
       scatterG.setColor(Color.YELLOW);
@@ -574,7 +574,7 @@ public class Herd {
         y=Integer.parseInt(parts[1]);
         y/=(double)no_people;
         y*=100.0;
-        
+
         sumx+=x;
         sumxx+=x*x;
         sumxy+=x*Math.log(y);
@@ -588,7 +588,7 @@ public class Herd {
         scatterG.fillOval(-3+(int)(graph_margin+(scatter_width-graph_margin)*x),-3+(int)((scatter_height-graph_margin)-((scatter_height-graph_margin)*y)),6,6);
         s = br.readLine();
       }
-     
+
       br.close();
       fn = data_path+"data_"+String.valueOf(r0)+"_names.txt";
       if (!new File(fn).exists()) {
@@ -627,11 +627,11 @@ public class Herd {
         no[no_names]=Integer.parseInt(parts[2]);
         no_names++;
         s = br.readLine();
-        if (s!=null) 
+        if (s!=null)
           if (s.length()<3) s=null;
       }
       br.close();
-      
+
       if (job_name.trim().length()==0) {
         x=vacc_coverage/100.0;
         y=(no_recoveries/(double)no_people);
@@ -646,7 +646,7 @@ public class Herd {
       }
       Color[] colors_rim = new Color[] {Color.GREEN,Color.BLUE,Color.RED};
       Color[] colors_mid = new Color[] {new Color(128,0,0),new Color(0,128,0),new Color(0,0,128)};
-      
+
       for (int i=0; i<no_names; i++) {
         x=vacc[i]/100.0;
         y=no[i]/(double)no_people;
@@ -660,11 +660,11 @@ public class Herd {
         scatterG.setColor(Color.WHITE);
         scatterG.drawString(names[i], 330, y_pos+16);
       }
-      
+
       grad=0;
       grad=(n*sumxy-(sumx*sumy))/((n*sumxx)-(sumx*sumx));
       y0=(sumy-(grad*sumx))/n;
-      
+
       int lastY=0;
       scatterG.setColor(Color.RED);
       for (int i=(int)graph_margin; i<(int)(scatter_width); i++) {
@@ -679,9 +679,9 @@ public class Herd {
     scatterG.rotate(-Math.PI/2.0);
     scatterG.drawString("Totel Infections (%)",-150-(int)(((scatter_width-graph_margin)/2)-(fm.stringWidth("Total Infections (%)")/2)),15);
     scatterG.rotate(Math.PI/2.0);
-    
+
     // Now plot the bar graph as well.
-    
+
     barG.setColor(Color.BLACK);
     barG.fillRect(0, 0, scatter_width, scatter_height);
     barG.setColor(Color.WHITE);
@@ -697,28 +697,28 @@ public class Herd {
       else barG.drawString(String.valueOf((int)(i*(no_people/10.0))),(int)(graph_margin-13),4+(int)((scatter_height-graph_margin)-(i*(scatter_height-graph_margin)/10.0)));
     }
     barG.setFont(graphTitle);
-    
+
     //Things to plot...
     //1. Vaccinated people
     //2. People who were sick (recovered)
     //3. People who never even got contacted
     //4. Total healthy people
-    
+
     int bar_width=(int)(((scatter_width-graph_margin)-2)/3.5);
-  
+
     barG.setColor(Color.GREEN);
     int healthy_height=(int) (((no_healthy+no_vaccinations)/(double)no_people)*((scatter_height-graph_margin-2)));
     barG.fillRect((int)graph_margin+2,(int)(((scatter_height-graph_margin)-1)-healthy_height),bar_width,healthy_height);
-    
+
     barG.setColor(Color.BLUE);
     int vacc_height=(int) ((no_vaccinations/(double)no_people)*((scatter_height-graph_margin-2)));
     barG.fillRect((int)graph_margin+2+bar_width,(int)(((scatter_height-graph_margin)-1)-vacc_height),bar_width,vacc_height);
-    
+
     barG.setColor(Color.GRAY);
     int rec_height=(int) ((no_recoveries/(double)no_people)*((scatter_height-graph_margin-2)));
     barG.fillRect((int)graph_margin+2+(2*bar_width),(int)(((scatter_height-graph_margin)-1)-rec_height),bar_width,rec_height);
     no_people=orig_no_people;
-    
+
     barG.setColor(Color.WHITE);
     barG.drawLine((int)(graph_margin+2),(int)(scatter_height-graph_margin),(int)(graph_margin+2),(int)(scatter_height-graph_margin)+2);
     barG.drawLine((int)(graph_margin+bar_width+2),(int)(scatter_height-graph_margin),(int)(graph_margin+bar_width+2),(int)(scatter_height-graph_margin)+2);
@@ -739,7 +739,7 @@ public class Herd {
     barG.drawString("People",-150-(int)(((scatter_width-graph_margin)/2)-(fm.stringWidth("People")/2)),15);
     barG.rotate(Math.PI/2.0);
   } //g b r grey
-  
+
   public Herd() {
     littleStat = new Font("Consolas",Font.BOLD,24);
     bigStat = new Font("Arial Narrow",Font.PLAIN,48);
@@ -752,7 +752,7 @@ public class Herd {
       person_images[1] = ImageIO.read(new File("images/vac.gif"));
       person_images[2] = ImageIO.read(new File("images/inf.gif"));
       person_images[3] = ImageIO.read(new File("images/imm.gif"));
-      
+
     } catch (Exception e) {e.printStackTrace();}
     main = new JFrame();
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -775,17 +775,17 @@ public class Herd {
     frame_timer = new Timer(5, eh);
     unattended_timer = new Timer(5000,eh);
     main.addMouseListener(eh);
-   
+
   }
-  
+
   public void seed(int no) {
     for (int i=0; i<no; i++) {
       person_status[i]=INFECTED;
       no_infs++;
       no_healthy--;
-    }       
+    }
   }
-  
+
   public void setStatus(String s) {
     try {
       System.out.println(commandURL+"?cmd=set_status&msg="+s);
@@ -796,7 +796,7 @@ public class Herd {
       br.close();
     } catch (Exception e) { e.printStackTrace(); }
   }
-  
+
   public void nextCommand() {
     try {
       URL url = new URL(commandURL+"?cmd=next");
@@ -833,14 +833,14 @@ public class Herd {
           setStatus(STATUS_DEMO);
         }
       }
-     
+
     } catch (Exception e) {
       System.out.println("Error accessing "+commandURL);
       e.printStackTrace();
-     
+
     }
   }
-  
+
   public void saveFrame() {
     f++;
     String movie="mov";
@@ -852,7 +852,7 @@ public class Herd {
       ImageIO.write(playfield,"PNG",new File(movie));
     } catch (Exception ez) {}
   }
- 
+
   public void testURL() {
     if (!commandURL.endsWith("/")) commandURL+="/";
     commandURL+="herdsim.php";
@@ -865,14 +865,14 @@ public class Herd {
       System.out.println(commandURL+"?cmd=hello returned "+s);
       if (!(s.toUpperCase().equals("HERD_OK"))) {
         System.exit(-1);
-      } 
+      }
     } catch (Exception e) {
       System.out.println("Error accessing "+commandURL);
       e.printStackTrace();
       System.exit(-1);
     }
   }
-  
+
   public static void main(String[] args) {
     String m="";//"/demo";
     if (args.length>0) m = args[0];
@@ -884,12 +884,12 @@ public class Herd {
       h.current_r0_order=(byte)Integer.parseInt(bits[0]);
       h.current_vacc_order=(byte)Integer.parseInt(bits[1]);
       br.close();
-      
+
     } catch (Exception e) {}
-    
+
     h.gui_mode=PC;
-    
-    
+
+
     if (m.toLowerCase().equals("/demo")) {
       h.gui_mode=UNATTENDED;
       h.r0=h.r0_order[h.current_r0_order];
@@ -906,9 +906,9 @@ public class Herd {
         h.go();
       }
     });
-       
+
   }
-  
+
   class EventHandler implements ActionListener, MouseListener {
     int extra_frames=0;
     int graph_counter=0;
@@ -941,9 +941,9 @@ public class Herd {
           if ((gui_mode==UNATTENDED) || (gui_mode==ANDROID_IDLE) || (gui_mode==ANDROID)) {
             unattended_timer.start();
           }
-            
+
         }
-        
+
         else if (Herd.this.current_mode==ENDING_TITLE) {
           extra_frames++;
           title.titleFade((50.0f-extra_frames)/50.0f);
@@ -960,7 +960,7 @@ public class Herd {
             extra_frames=0;
           }
         }
-        
+
         else if (Herd.this.current_mode==STARTING_GAME) {
           extra_frames++;
           drawPlayfield(2.0f);
@@ -971,7 +971,7 @@ public class Herd {
             extra_frames=0;
           }
         }
-        
+
         else if (Herd.this.current_mode==PLAYING) {
           drawPlayfield(2.0f);
           movepeople();
@@ -984,7 +984,7 @@ public class Herd {
           }
         } else if (Herd.this.current_mode==ENDING_GAME){
           extra_frames++;
-          
+
           if (extra_frames==START_WIGGLE_1) {
             for (int i=0; i<no_people; i++) {
               person_vely[i]=0;
@@ -1020,17 +1020,17 @@ public class Herd {
                 person_velx[i]=(((healthy_pos-50)+target)-person_x[i])/(1.0f+(float)(END_WIGGLE_2-START_WIGGLE_2));
                 ih++;
                 target=(int) (bottom-(5+((double)ih/(double)no_healthy)*(all_healthy*0.9)*scale));
-                
+
               }
               else if (person_status[i]==VACCINATED) {
                 person_velx[i]=(((vacc_pos-50)+target)-person_x[i])/(1.0f+(float)(END_WIGGLE_2-START_WIGGLE_2));
                 iv++;
                 target=(int) (bottom-(5+((double)iv/(double)no_vaccinations)*(no_vaccinations*0.9)*scale));
-              
+
               }
               else if (person_status[i]==OVER_IT) {
                 person_velx[i]=(((recover_pos-50)+target)-person_x[i])/(1.0f+(float)(END_WIGGLE_2-START_WIGGLE_2));
-                ir++; 
+                ir++;
                 target=(int) (bottom-(5+((double)ir/(double)no_recoveries)*(no_recoveries*0.9)*scale));
               }
               else target=0;
@@ -1052,7 +1052,7 @@ public class Herd {
               }
             }
             drawPlayfield(2.0f);
-            
+
           } else if ((extra_frames>=START_BARS) && (extra_frames<END_BARS)) {
             if (extra_frames==220) {
               pg2d.setColor(Color.BLACK);
@@ -1065,17 +1065,17 @@ public class Herd {
             int all_healthy=no_healthy+no_vaccinations;
             pg2d.setColor(c);
             pg2d.fillRect(healthy_pos-60,(int)(bottom-(all_healthy*scale)), 120, 2+(int)(all_healthy*scale));
-            
+
             c = new Color(0.4f,0.4f,0.4f,(extra_frames-START_BARS)/((float)1.0*(END_BARS-START_BARS)));
             pg2d.setColor(c);
             pg2d.fillRect(recover_pos-60,(int)(bottom-(no_recoveries*scale)), 120, 2+(int)(no_recoveries*scale));
-            
+
             if (no_vaccinations>0) {
               c = new Color(0,0,1.0f,(extra_frames-START_BARS)/((float)1.0*(END_BARS-START_BARS)));
               pg2d.setColor(c);
               pg2d.fillRect(vacc_pos-60,(int)(bottom-(no_vaccinations*scale)), 120, 2+(int)(no_vaccinations*scale));
             }
-            
+
             c = new Color(0,0,0,(extra_frames-START_BARS)/((float)1.0*(END_BARS-START_BARS)));
             pg2d.setColor(c);
             pg2d.fillRect(healthy_pos-60,(int)(bottom-(all_healthy*scale))-50,120,50);
@@ -1085,16 +1085,16 @@ public class Herd {
             pg2d.fillRect(vacc_pos-60,(int)(bottom-(no_vaccinations*scale))-50,120,50);
             pg2d.fillRect(vacc_pos-60,bottom+1,120,10);
             g2d.drawImage(playfield,0,0,null);
-            
-            
+
+
           } else if (extra_frames==END_BARS) {
             updateLogs();
-            
+
           } else if (extra_frames==FADE_GRAPH) {
             pg2d.setColor(Color.BLACK);
             pg2d.fillRect(0,0,playfield_width,playfield_height+150);
             g2d.drawImage(playfield,0,0,null);
-            
+
           } else if ((extra_frames>FADE_GRAPH) && (extra_frames<=END_FADE_GRAPH)) {
             scatterG2.drawImage(scatter, 0, 0, null);
             scatterG2.setColor(new Color(0,0,0,1.0f-(float)((extra_frames-FADE_GRAPH*1.0f)/(1.0f*END_FADE_GRAPH-FADE_GRAPH))));
@@ -1102,7 +1102,7 @@ public class Herd {
             barG2.drawImage(bar,0,0,null);
             barG2.setColor(new Color(0,0,0,1.0f-(float)((extra_frames-FADE_GRAPH*1.0f)/(1.0f*END_FADE_GRAPH-FADE_GRAPH))));
             barG2.fillRect(0,0,scatter_width,scatter_width);
-            
+
             pg2d.drawImage(scatter2, (int)(1.25*scatter_marg)+scatter_width,(int)(scatter_marg*1),null);
             pg2d.drawImage(bar2,scatter_marg,(int)(scatter_marg*1),null);
             g2d.drawImage(playfield,0,0,null);
@@ -1112,14 +1112,14 @@ public class Herd {
                 //pg2d.drawImage(comp,scatter_marg,(int)(scatter_marg*1),null);
                 //g2d.drawImage(playfield,0,0,null);
                 //Thread.sleep(5000);
-                
+
               } catch (Exception ex) {}
               frame_timer.start();
               graph_counter=0;
               graph_selection=1;
-              
+
             }
-          
+
           } else if (extra_frames>END_FADE_GRAPH) {
             extra_frames=END_FADE_GRAPH+1;
             if ((gui_mode==UNATTENDED) || (gui_mode==ANDROID_IDLE)) {
@@ -1140,7 +1140,7 @@ public class Herd {
                 frame_timer.stop();
                 pc_waiting_for_next_game=true;
               }
-              
+
               /*graph_counter++;
               if (graph_counter>=50) {
                 graph_counter=0;
@@ -1148,7 +1148,7 @@ public class Herd {
                 if (graph_selection==2) {
                   pg2d.drawImage(bar2,scatter_marg,(int)(scatter_marg*1),null);
                   g2d.drawImage(playfield,0,0,null);
-                
+
                 } else if (graph_selection==3) {
                   pg2d.drawImage(comp,scatter_marg,(int)(scatter_marg*1),null);
                   g2d.drawImage(playfield,0,0,null);
@@ -1160,8 +1160,8 @@ public class Herd {
           }
         }
         lock--;
-      } 
-    
+      }
+
     }
     public void mouseReleased(MouseEvent e) {
       if ((title.enable_buttons) && (gui_mode==PC)) {
@@ -1170,19 +1170,19 @@ public class Herd {
         g2d.drawImage(playfield,0,0,null);
 
       }
-      
+
       else if (pc_waiting_for_next_game) {
         pc_waiting_for_next_game=false;
         current_mode=TITLE_PAGE;
         extra_frames=0;
         frame_timer.start();
         main.setVisible(true);
-        
+
       }
     }
     public void mouseEntered(MouseEvent e) {}
     public void mouseExited(MouseEvent e) {}
     public void mousePressed(MouseEvent e) {}
     public void mouseClicked(MouseEvent e) {}
-  } 
+  }
 }

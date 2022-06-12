@@ -29,7 +29,7 @@ public class TitlePanel {
   static String job_name_Text = "Name:";
   Herd h;
   public boolean enable_buttons;
-    
+
   public void startAnimation(int _wid, int _hei,Graphics2D _target) {
     enable_buttons=true;
     transfer=_target;
@@ -39,7 +39,7 @@ public class TitlePanel {
     g.fillRect(0, 0, wid,hei);
     interactiveMenu();
   }
-  
+
   public void interactiveMenu() {
     g.setColor(Color.WHITE);
     g.setFont(dmFont);
@@ -72,7 +72,7 @@ public class TitlePanel {
     transfer.drawImage(bi, 0, 0, null);
     enable_buttons=true;
   }
-  
+
   public void clickButton(int x, int y) {
     boolean edit_cov=false;
     boolean edit_r0=false;
@@ -88,7 +88,7 @@ public class TitlePanel {
         edit_cov=true;
       }
     }
-    
+
     if ((y>=530) && (y<=562) && (x>=(wid/2)+165) && (x<=(wid/2)+197)) {
       if (h.r0>3) {
         h.r0--;
@@ -101,9 +101,9 @@ public class TitlePanel {
         edit_r0=true;
       }
     }
-    
-    
-    
+
+
+
     else if ((y>=580) && (y<=674) && (x>=(wid/2)-28) && (x<=(wid/2)+28)) {
       enable_buttons=false;
       h.current_mode=Herd.ENDING_TITLE;
@@ -119,7 +119,7 @@ public class TitlePanel {
       g.drawString("%",(wid/2)+270,508);
 
     }
-    
+
     if (edit_r0) {
       g.setColor(Color.BLACK);
       g.fillRect((wid/2)+220,530,60,30);
@@ -127,14 +127,14 @@ public class TitlePanel {
       g.setColor(Color.RED);
       String v = String.valueOf(h.r0);
       g.drawString(v,(wid/2)+245,558);
-     
+
     }
-    
+
     if ((edit_r0) || (edit_cov)) {
       transfer.drawImage(bi, 0, 0, null);
     }
   }
-  
+
   public void titleFade(float opac) {
     transfer.drawImage(bi,0,0,null);
     if (opac<1.0f) {
@@ -143,14 +143,14 @@ public class TitlePanel {
       g.fillRect(0, 0, wid,hei);
     }
   }
-  
+
   public TitlePanel(int wid, int hei,Herd herd) {
     h=herd;
     try {
       bi = new BufferedImage(wid,hei,BufferedImage.TYPE_3BYTE_BGR);
       g = (Graphics2D) bi.getGraphics();
       // Legend = 4 rows of icon, and some text next to it.
-      
+
       icons[0]=ImageIO.read(new File("images/big_sus.png"));
       icons[1]=ImageIO.read(new File("images/big_vac.png"));
       icons[2]=ImageIO.read(new File("images/big_inf.png"));
@@ -162,9 +162,9 @@ public class TitlePanel {
       dmFont = new Font("Dot Matrix",Font.PLAIN,36);
       crFont = new Font("Consolas",Font.BOLD,36);
       g.setFont(dmFont);
-      
+
     } catch (Exception e) { e.printStackTrace(); }
-    
+
   }
 
 }
