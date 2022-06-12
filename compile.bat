@@ -1,1 +1,1 @@
-javac *.java
+javac com/mrc/herd/*.java

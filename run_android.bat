@@ -1,1 +1,1 @@
-javaw Herd /URL http://192.168.2.2/epi
+start javaw com.mrc.herd.Herd /URL http://127.0.0.1/epi
