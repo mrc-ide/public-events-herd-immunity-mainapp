@@ -677,7 +677,7 @@ public class Herd {
     } catch (Exception e) { e.printStackTrace(); }
     scatterG.setColor(Color.WHITE);
     scatterG.rotate(-Math.PI/2.0);
-    scatterG.drawString("Totel Infections (%)",-150-(int)(((scatter_width-graph_margin)/2)-(fm.stringWidth("Total Infections (%)")/2)),15);
+    scatterG.drawString("Total Infections (%)",-150-(int)(((scatter_width-graph_margin)/2)-(fm.stringWidth("Total Infections (%)")/2)),15);
     scatterG.rotate(Math.PI/2.0);
 
     // Now plot the bar graph as well.
